@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><config>
+<seed>michal3141</seed><depth>3</depth><hitsPerHour>900</hitsPerHour><crawlTime>15</crawlTime><strategy>DEPTH_FIRST</strategy><relations><follows>true</follows><followedBy>true</followedBy><repliesTo>false</repliesTo><mentions>false</mentions><hasTweets>false</hasTweets><retweets>false</retweets></relations></config>
