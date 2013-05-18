@@ -50,7 +50,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 		UserDto user = new UserDto();
 		user.setName(screenName);
 		
-		while (isCrawling) {
+		if (isCrawling) {
 			visit(user, 1);
 		}
 		
@@ -97,7 +97,8 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 								}
 							}
 						}
-					} else if (relations.contains(Relation.FOLLOWS)) {
+					}
+					if (relations.contains(Relation.FOLLOWS)) {
 						if (isCrawling) {
 							Thread.sleep(3600000 / hitsPerHour);
 							System.out.println("Accessing API");
@@ -114,24 +115,26 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 								}
 							}
 						}
-					} else if (relations.contains(Relation.MENTIONS)) {
+					}
+					if (relations.contains(Relation.MENTIONS)) {
 						if (isCrawling) {
 							// Thread.sleep(3600000 / hitsPerHour);
 							//TODO: write some nasty code here
 						}
-					} else if (relations.contains(Relation.REPLIES_TO)) {
+					}
+					if (relations.contains(Relation.REPLIES_TO)) {
 						if (isCrawling) {
 							// Thread.sleep(3600000 / hitsPerHour);
 							//TODO: write some nasty code here
 						}
-					} else if (relations.contains(Relation.HAS_TWEETS)) {
+					}
+					if (relations.contains(Relation.HAS_TWEETS)) {
 						if (isCrawling) {
 							// Thread.sleep(3600000 / hitsPerHour);
 							//TODO: write some nasty code here
 						}
 					} 			
-				} 
-				
+				}			
 			} catch (TwitterException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {

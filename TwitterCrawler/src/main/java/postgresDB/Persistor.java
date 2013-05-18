@@ -18,7 +18,7 @@ public class Persistor {
 		Session session = sessionFactory.openSession();
 		session.beginTransaction();
 
-		session.save((UserDto) node);
+		session.merge((UserDto) node);
 		
 		session.getTransaction().commit();
 		session.close();

@@ -38,10 +38,10 @@ public class Test {
 	private static void setUpAuthorization() {
 		cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
-		  .setOAuthConsumerKey("Enter your consumer key here")
-		  .setOAuthConsumerSecret("Enter your cosumer secret here")
-		  .setOAuthAccessToken("Eneter your access token here")
-		  .setOAuthAccessTokenSecret("Enter your access token secret here");
+		  .setOAuthConsumerKey("WvPPmJPjNVWpDmcUimkvg")
+		  .setOAuthConsumerSecret("zAp8jTbPNT5jSaoOm5rfMeE8uLXh4F4APdvAFitVVYo")
+		  .setOAuthAccessToken("1172898295-Sji9i1YJ9iHhTSlsW0Gldj3JShPIp5G6hmNZaIW")
+		  .setOAuthAccessTokenSecret("RdJxjRrVv41sGu4hMdQwk7AP7MllUoufyLdsPWMCKE");
 	}
 	
 	private static void hackItUp(Twitter twitter) {

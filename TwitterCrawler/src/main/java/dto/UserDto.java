@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -17,40 +19,46 @@ import javax.persistence.Table;
 @Table(name="Users")
 public class UserDto extends NodeDto {
 	
-	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Integer id;
 	
 	/**
 	 * Users which are followed by this user
 	 */
+	@JoinColumn(nullable=true)
 	@OneToMany(cascade=CascadeType.ALL)
 	private Collection<UserDto> friends = new ArrayList<>();
 	
 	/**
 	 * Users which follows this user
 	 */
+	@JoinColumn(nullable=true)
 	@OneToMany(cascade=CascadeType.ALL)
 	private Collection<UserDto> followers = new ArrayList<>();
 	
 	/**
 	 * Users which are replied by this user in recent tweets
 	 */
+	@JoinColumn(nullable=true)
 	@OneToMany(cascade=CascadeType.ALL)
 	private Collection<UserDto> replied = new ArrayList<>();
 	
 	/**
 	 * Users which are mentioned by this user in recent tweets
 	 */
+	@JoinColumn(nullable=true)
 	@OneToMany(cascade=CascadeType.ALL)
 	private Collection<UserDto> mentioned = new ArrayList<>();
 	
 	/**
 	 * Tweets that are tweeted by this user
 	 */
+	@JoinColumn(nullable=true)
 	@OneToMany(cascade=CascadeType.ALL)
 	private Collection<TweetDto> tweets = new ArrayList<>();
 	
+	@Id 
+	@GeneratedValue(strategy=GenerationType.IDENTITY) 
+	@Column
+	private long id;
 	/**
 	 * Screen name for this user
 	 */
@@ -61,7 +69,7 @@ public class UserDto extends NodeDto {
 	 */
 	private String lang;
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -131,5 +139,32 @@ public class UserDto extends NodeDto {
 		sb.append("Lang : " + lang + "\n");
 		return sb.toString();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserDto other = (UserDto) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+
+	
 		
 }
