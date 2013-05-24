@@ -1,8 +1,6 @@
 package consoleapp;
 
 import logic.TwitterDownloader;
-import config.ConfigParser;
-import config.CrawlerConfiguration;
 import twitter4j.PagableResponseList;
 import twitter4j.Paging;
 import twitter4j.ResponseList;
@@ -12,6 +10,8 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
+import config.ConfigParser;
+import config.CrawlerConfiguration;
 
 public class Test {
 	

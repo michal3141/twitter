@@ -18,7 +18,13 @@ import javax.persistence.Table;
 @Entity
 @Table(name="Users")
 public class UserDto extends NodeDto {
+
+	private static int k=0;
 	
+	public UserDto(){
+		++k;
+		setId(k);
+	}
 	
 	/**
 	 * Users which are followed by this user
@@ -165,6 +171,12 @@ public class UserDto extends NodeDto {
 		return true;
 	}
 
-	
+	public String getSql(){
+	//	StringBuilder builder= new StringBuilder("");
+	//	builder.append("INSERT INTO zlecenia VALUES ("); 
+	//	builder.append(getId()+","+getLang()+","+getName()+",");
+	//	builder.append(get)
+		return null;
+	}
 		
 }
