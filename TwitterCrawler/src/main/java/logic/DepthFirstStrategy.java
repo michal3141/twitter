@@ -20,7 +20,7 @@ import twitter4j.User;
 
 public class DepthFirstStrategy implements IStrategy, IListener {
 
-	private TwitterDownloader context;
+	private TwitterDownloader contexti;
 	private boolean isCrawling = true;
 	private IPublisher downloadTimer;
 	private Twitter twitter;
@@ -31,7 +31,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 	private Set<Relation> relations;
 	
 	public DepthFirstStrategy(TwitterDownloader context) {
-		this.context = context;
+		this.contexti = context;
 		twitter = context.getTwitter();
 		screenName = context.getConfig().getSeed();
 		depth = context.getConfig().getDepth();
