@@ -39,7 +39,7 @@ public class Persistor {
 		    Statement st = dbcon.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_UPDATABLE);
 		    System.out.println(sql);
 		    // dla potrzeb ogolnosci nie wnikamy tu w tabele, a dostarczamy gotowe zapytanie sql
-	/*	    st.executeUpdate("DROP TABLE IF EXISTS twit");
+		    st.executeUpdate("DROP TABLE IF EXISTS twit");
 		    PreparedStatement ps = dbcon.prepareStatement("CREATE TABLE twit ("
                     + "id bigserial NOT NULL PRIMARY KEY,"
                     + "data VARCHAR(64), " 
@@ -48,7 +48,7 @@ public class Persistor {
                     + "mentioned_id integer,"
                     + "friends_id integer,"
                     + "followers_id integer)");
-		    ps.executeUpdate();*/
+		    ps.executeUpdate();
 		    
 		    int insertedRows = st.executeUpdate(sql);//,Statement.RETURN_GENERATED_KEYS);
 		    System.out.println(insertedRows);
