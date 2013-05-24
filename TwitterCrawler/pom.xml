@@ -6,6 +6,7 @@
   <name>TwitterCrawler</name>
   <description>Crawling Twitter and persisting data in PostgreSQL Database</description>
   
+  
   <repositories>
       <repository>
          <id>twitter4j.org</id>
@@ -20,6 +21,7 @@
       </repository>
    </repositories>
    <dependencies>
+   
       <dependency>
          <groupId>org.twitter4j</groupId>
          <artifactId>twitter4j-core</artifactId>
@@ -31,9 +33,25 @@
             <version>9.1-901.jdbc4</version>
       </dependency>
       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.4-702.jdbc4</version>
+      </dependency>
+      <dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>4.0.0.Final</version>
+			<version>4.1.1.Final</version>
 	  </dependency>
+
+      <dependency>
+      	<groupId>org.hibernate.javax.persistence</groupId>
+      	<artifactId>hibernate-jpa-2.0-api</artifactId>
+      	<version>1.0.1.Final</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.hibernate.common</groupId>
+      	<artifactId>hibernate-commons-annotations</artifactId>
+      	<version>4.0.1.Final</version>
+      </dependency>
    </dependencies>
 </project>
