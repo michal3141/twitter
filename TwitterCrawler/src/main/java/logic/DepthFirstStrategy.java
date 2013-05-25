@@ -2,11 +2,6 @@ package logic;
 
 import java.util.Set;
 
-import dto.NodeDto;
-import dto.TweetDto;
-import dto.UserDto;
-import enums.Relation;
-import events.CrawlingEvent;
 import listeners.IListener;
 import postgresDB.Persistor;
 import publishers.DownloadTimer;
@@ -17,6 +12,11 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
+import dto.NodeDto;
+import dto.TweetDto;
+import dto.UserDto;
+import enums.Relation;
+import events.CrawlingEvent;
 
 public class DepthFirstStrategy implements IStrategy, IListener {
 
