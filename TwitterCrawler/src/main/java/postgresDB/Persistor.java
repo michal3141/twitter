@@ -48,8 +48,8 @@ public class Persistor {
                     + "mentioned_id integer,"
                     + "friends_id integer,"
                     + "followers_id integer)");
-		    ps.executeUpdate();*/
-		    
+		    ps.executeUpdate();
+		    */
 		    int insertedRows = st.executeUpdate(sql);//,Statement.RETURN_GENERATED_KEYS);
 		    System.out.println(insertedRows);
 		    
