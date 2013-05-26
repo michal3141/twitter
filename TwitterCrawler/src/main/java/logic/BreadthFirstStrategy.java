@@ -31,6 +31,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 	
 	public BreadthFirstStrategy(TwitterDownloader context) {
 		this.context = context;
+		twitter = context.getTwitter();
 		screenName = context.getConfig().getSeed();
 		queue= new LinkedList();
 		depth = context.getConfig().getDepth();
@@ -41,7 +42,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		
 	@Override
 	public void execute() {
-		downloadTimer = new DownloadTimer(context.getConfig().getCrawlTime());
+		downloadTimer = new DownloadTimer(crawlTime);
 		downloadTimer.register(this);
 		
 		System.out.println("Before Crawling...");
@@ -62,14 +63,37 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		int currDepth= 0;
 
 		while(!queue.isEmpty()){
+			if(currDepth>depth){
+				System.out.println("In your head zombie zombie");
+				break;
+			}
+			try {
+				Thread.sleep(3600000 / hitsPerHour);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
 			NodeDto node= (NodeDto)queue.remove();			
 			if (node instanceof UserDto) {
 				if (relations.contains(Relation.FOLLOWED_BY)) {
-					System.out.println("Accessing API");
-					try {
-						PagableResponseList<User> users = twitter.getFollowersList(((UserDto) node).getName(), -1);
-					} catch (TwitterException e) {
-						e.printStackTrace();
+					if(isCrawling){
+						System.out.println("Accessing API");
+						try {
+							PagableResponseList<User> users = twitter.getFollowersList(((UserDto) node).getName(), -1);
+							for(User u: users){
+								if(isCrawling){
+									UserDto user = new UserDto();
+									user.setName(u.getScreenName());
+									user.setLang(u.getLang());
+									((UserDto) node).getFollowers().add(user);
+									System.out.println("Obtaining follower : \n" + user.toString() + 
+											"at level " + currDepth + "\n");
+									queue.add(user);
+									++currDepth;
+								}
+							}
+						} catch (TwitterException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
