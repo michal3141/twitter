@@ -4,6 +4,7 @@ import java.util.Set;
 
 import listeners.IListener;
 import postgresDB.Persistor;
+import postgresDB.SQLBuilder;
 import publishers.DownloadTimer;
 import publishers.IPublisher;
 import twitter4j.PagableResponseList;
@@ -29,7 +30,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 	private int hitsPerHour;
 	private int crawlTime;
 	private Set<Relation> relations;
-	private StringBuilder builder;
+	private SQLBuilder builder;
 	
 	public DepthFirstStrategy(TwitterDownloader context) {
 		this.context = context;
@@ -39,7 +40,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 		hitsPerHour = context.getConfig().getHitsPerHour();
 		crawlTime = context.getConfig().getCrawlTime();
 		relations = context.getConfig().getRelations();
-		builder= new StringBuilder("");
+		builder= new SQLBuilder();
 	}
 	
 	@Override
@@ -51,8 +52,8 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 		
 		UserDto user = new UserDto();
 		user.setName(screenName);
-		generateTables();
-		builder.append("INSERT INTO twit(name) VALUES ('"+user.getName()+"');\n");
+		builder.generateTables();
+		builder.appendOne(user.getName());
 		if (isCrawling) {
 			visit(user, 1);
 		}
@@ -62,7 +63,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 		
 		System.out.println("Saving to database...");
 	//	Persistor.save(user);
-		Persistor.save1(builder.toString());
+		Persistor.save1(builder.getSQL());
 		System.out.println("Saving to database finished.");
 	}
 
@@ -81,7 +82,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 							tweet.setTweetId(s.getId());
 							((TweetDto) node).getRetweets().add(tweet);
 							System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
-							prepareSQL(tweet,0,"friends_id");
+							builder.prepareSQL(tweet,0,"friends_id");
 							visit(tweet, currDepth + 1);
 						}
 					}
@@ -98,7 +99,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 									((UserDto) node).getFollowers().add(user);
 									System.out.println("Obtaining follower : \n" + user.toString() + 
 													   "at level " + currDepth + "\n");
-									prepareSQL(user,((UserDto) node).getId(),"followers_id");
+									builder.prepareSQL(user,((UserDto) node).getId(),"followers_id");
 									visit(user, currDepth + 1);
 								}
 							}
@@ -117,7 +118,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 									((UserDto) node).getFriends().add(user);
 									System.out.println("Obtaining friend : \n" + user.toString() +
 													   "at level " + currDepth + "\n");
-									prepareSQL(user,((UserDto) node).getId(),"friends_id");
+									builder.prepareSQL(user,((UserDto) node).getId(),"friends_id");
 									visit(user, currDepth + 1);
 								}
 							}
@@ -155,30 +156,6 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 		if (event.getSource() == this.downloadTimer) {
 			System.out.println(event.getInfo());
 			isCrawling = false;
-		}
-	}
-	
-	public void generateTables(){
-		
-		builder.append("DROP TABLE IF EXISTS twit;\n");
-		builder.append("CREATE TABLE twit ("
-        + "id bigserial NOT NULL PRIMARY KEY,"
-        + "data VARCHAR(64), " 
-        + "name VARCHAR(256),"
-        + "replied_id integer,"
-        + "mentioned_id integer,"
-        + "friends_id integer,"
-        + "followers_id integer);\n");
-	}
-	
-	public void prepareSQL(NodeDto node, long k, String relation){
-		if(node instanceof UserDto){
-			UserDto u=(UserDto)node;
-			builder.append("INSERT INTO twit(data,name,"+relation+") VALUES ("); 
-			builder.append("'"+u.getLang()+"', '"+u.getName()+"',"+k+");\n");
-		}
-		else{
-			System.out.println("Not implemented yet");
 		}
 	}
 

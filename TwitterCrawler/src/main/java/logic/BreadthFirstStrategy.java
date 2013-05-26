@@ -5,13 +5,18 @@ import java.util.Queue;
 import java.util.Set;
 
 import listeners.IListener;
+import postgresDB.Persistor;
+import postgresDB.SQLBuilder;
 import publishers.DownloadTimer;
 import publishers.IPublisher;
 import twitter4j.PagableResponseList;
+import twitter4j.ResponseList;
+import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
 import dto.NodeDto;
+import dto.TweetDto;
 import dto.UserDto;
 import enums.Relation;
 import events.CrawlingEvent;
@@ -28,6 +33,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 	private int hitsPerHour;
 	private int crawlTime;
 	private Set<Relation> relations;
+	private SQLBuilder builder;
 	
 	public BreadthFirstStrategy(TwitterDownloader context) {
 		this.context = context;
@@ -38,6 +44,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		hitsPerHour = context.getConfig().getHitsPerHour();
 		crawlTime = context.getConfig().getCrawlTime();
 		relations = context.getConfig().getRelations();
+		builder= new SQLBuilder();
 	}
 		
 	@Override
@@ -48,6 +55,8 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		System.out.println("Before Crawling...");
 		UserDto user= new UserDto();
 		user.setName(screenName);
+		builder.generateTables();
+		builder.appendOne(user.getName());
 		queue.add(user);
 		
 		if (isCrawling){
@@ -56,6 +65,11 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		
 		((DownloadTimer) downloadTimer).getTimer().cancel();
 		System.out.println("After Crawling...");
+		
+		System.out.println("Saving to database...");
+	//	Persistor.save(user);
+		Persistor.save1(builder.getSQL());
+		System.out.println("Saving to database finished.");
 	}
 	
 	public void bfs_twit(){
@@ -88,7 +102,55 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 									System.out.println("Obtaining follower : \n" + user.toString() + 
 											"at level " + currDepth + "\n");
 									queue.add(user);
-									++currDepth;
+									builder.prepareSQL(user,((UserDto) node).getId(),"followers_id");
+								}
+							}
+						} catch (TwitterException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				else if(relations.contains(Relation.FOLLOWS)){
+					if(isCrawling){
+						System.out.println("Accessing API");
+						try {
+							Thread.sleep(3600000 / hitsPerHour);
+							
+							PagableResponseList<User> users = twitter.getFriendsList(((UserDto) node).getName(), -1);
+							for(User u: users){
+								if(isCrawling){
+									UserDto user = new UserDto();
+									user.setName(u.getScreenName());
+									user.setLang(u.getLang());
+									((UserDto) node).getFriends().add(user);
+									System.out.println("Obtaining friend : \n" + user.toString() +
+											   "at level " + currDepth + "\n");
+									queue.add(user);
+									builder.prepareSQL(user,((UserDto) node).getId(),"friends_id");
+								}
+							}
+						} catch (TwitterException e) {
+							e.printStackTrace();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}					
+				}
+			}
+			else if(node instanceof TweetDto){
+				if (relations.contains(Relation.RETWEETS)) {
+					if(isCrawling){
+						System.out.println("Accessing API");
+						try {
+							ResponseList<Status> statuses = twitter.getRetweets(((TweetDto) node).getTweetId());
+							for(Status s: statuses){
+								if(isCrawling){
+									TweetDto tweet = new TweetDto();
+									tweet.setTweetId(s.getId());
+									((TweetDto) node).getRetweets().add(tweet);
+									System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
+									queue.add(tweet);
+									builder.prepareSQL(tweet,0,"friends_id");
 								}
 							}
 						} catch (TwitterException e) {
@@ -97,6 +159,25 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 					}
 				}
 			}
+			if (relations.contains(Relation.MENTIONS)) {
+				if (isCrawling) {
+					// Thread.sleep(3600000 / hitsPerHour);
+					// yummy yummy
+				}
+			}
+			if (relations.contains(Relation.REPLIES_TO)) {
+				if (isCrawling) {
+					// Thread.sleep(3600000 / hitsPerHour);
+					//heiheihei
+				}
+			}
+			if (relations.contains(Relation.HAS_TWEETS)) {
+				if (isCrawling) {
+					// Thread.sleep(3600000 / hitsPerHour);
+					//papaamericano
+				}
+			}
+			++currDepth;
 		}
 	}
 	
