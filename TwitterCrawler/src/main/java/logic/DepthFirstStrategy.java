@@ -126,7 +126,14 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 					}
 					if (relations.contains(Relation.MENTIONS)) {
 						if (isCrawling) {
-							// Thread.sleep(3600000 / hitsPerHour);
+							Thread.sleep(3600000 / hitsPerHour);
+							System.out.println("Accessing API");
+							ResponseList<Status> mentions = twitter.getMentionsTimeline();
+							for (Status s : mentions) {
+								TweetDto tweet = new TweetDto();
+								tweet.setTweetId(s.getId());
+								
+							}
 							//TODO: write some nasty code here
 						}
 					}
