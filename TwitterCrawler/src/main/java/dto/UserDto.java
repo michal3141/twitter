@@ -19,7 +19,7 @@ import javax.persistence.Table;
 @Table(name="Users")
 public class UserDto extends NodeDto {
 
-	private static int k=0;
+	private static long k=0;
 	
 	public UserDto(){
 		++k;
@@ -79,7 +79,7 @@ public class UserDto extends NodeDto {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

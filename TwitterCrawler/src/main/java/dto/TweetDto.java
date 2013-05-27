@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Table(name="Tweets")
 public class TweetDto extends NodeDto {
 	
-	private static int k=0;
+	private static long k=0;
 	
 	public TweetDto(){
 		++k;
@@ -30,7 +30,7 @@ public class TweetDto extends NodeDto {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	private int id;
+	private long id;
 	
 	private long tweetId;
 
@@ -38,6 +38,8 @@ public class TweetDto extends NodeDto {
 	 * Parent id of this tweet - this is user who wrote tweet
 	 */
 	private long parentId;
+	
+	private String text;
 	
 	public Collection<TweetDto> getRetweets() {
 		return retweets;
@@ -64,7 +66,15 @@ public class TweetDto extends NodeDto {
 		this.parentId = parentId;
 	}
 	
-	public void setId(int k) {
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	public void setId(long k) {
 		this.id = k;
 	}
 

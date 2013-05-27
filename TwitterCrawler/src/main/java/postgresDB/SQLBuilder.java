@@ -23,19 +23,19 @@ public class SQLBuilder {
         + "id bigserial NOT NULL PRIMARY KEY,"
         + "data VARCHAR(64), " 
         + "name VARCHAR(256),"
-        + "replied_id integer,"
-        + "mentioned_id integer,"
-        + "friends_id integer,"
-        + "followers_id integer);\n");
+        + "replied_id bigint,"
+        + "mentioned_id bigint,"
+        + "friends_id bigint,"
+        + "followers_id bigint);\n");
 		
 		builder.append("DROP TABLE IF EXISTS tweets;\n");
 		builder.append("CREATE TABLE tweets ("
 		+ "id bigserial NOT NULL PRIMARY KEY,"
 		+ "data VARCHAR(64),"
-		+ "tweet_id integer,"
-		+ "mentioned_id integer,"
-		+ "has_tweets_id integer,"
-		+ "retweeted_id integer);\n");
+		+ "tweet_id bigint,"
+		+ "mentioned_id bigint,"
+		+ "has_tweets_id bigint,"
+		+ "retweeted_id bigint);\n");
 	}
 	
 	public void prepareSQL(NodeDto node, long k, String relation){
@@ -47,7 +47,7 @@ public class SQLBuilder {
 		else{
 			TweetDto t = (TweetDto) node;
 			builder.append("INSERT INTO tweets(data,tweet_id,"+relation+") VALUES (");
-			builder.append("'"+"t"+"', '"+t.getTweetId()+"',"+t.getParentId()+");\n");
+			builder.append("'"+t.getText()+"', '"+t.getTweetId()+"',"+t.getParentId()+");\n");
 		}
 	}
 	

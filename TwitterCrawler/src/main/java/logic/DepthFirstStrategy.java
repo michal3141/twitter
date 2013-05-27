@@ -13,6 +13,7 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
+import utils.Text;
 import dto.NodeDto;
 import dto.TweetDto;
 import dto.UserDto;
@@ -31,6 +32,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 	private int crawlTime;
 	private Set<Relation> relations;
 	private SQLBuilder builder;
+	private static final int LEN = 63;
 	
 	public DepthFirstStrategy(TwitterDownloader context) {
 		this.context = context;
@@ -81,6 +83,9 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 							TweetDto tweet = new TweetDto();
 							tweet.setTweetId(s.getId());
 							tweet.setParentId(((TweetDto) node).getTweetId());
+							String text = s.getText();
+							text = Text.processText(text);
+							tweet.setText(text);
 							((TweetDto) node).getRetweets().add(tweet);
 							System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
 							builder.prepareSQL(tweet,0,"retweeted_id");
@@ -134,7 +139,10 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 								if (isCrawling) {
 									TweetDto tweet = new TweetDto();
 									tweet.setTweetId(s.getId());
-									tweet.setParentId(((TweetDto) node).getTweetId());
+									tweet.setParentId(((UserDto) node).getId());
+									String text = s.getText();
+									text = Text.processText(text);
+									tweet.setText(text);
 									System.out.println("Obtaining mention : \n" + tweet.toString() + "at level " + currDepth + "\n");
 									builder.prepareSQL(tweet,0,"mentioned_id");
 									visit(tweet, currDepth + 1);
@@ -157,7 +165,10 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 								if (isCrawling) {
 									TweetDto tweet = new TweetDto();
 									tweet.setTweetId(s.getId());
-									tweet.setParentId(((TweetDto) node).getTweetId());
+									tweet.setParentId(((UserDto) node).getId());
+									String text = s.getText();
+									text = Text.processText(text);
+									tweet.setText(text);
 									System.out.println("Obtaining tweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
 									builder.prepareSQL(tweet,0,"has_tweets_id");
 									visit(tweet, currDepth + 1);
