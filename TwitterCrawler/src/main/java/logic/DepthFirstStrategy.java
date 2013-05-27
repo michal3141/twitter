@@ -80,9 +80,10 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 						if (isCrawling) {
 							TweetDto tweet = new TweetDto();
 							tweet.setTweetId(s.getId());
+							tweet.setParentId(((TweetDto) node).getTweetId());
 							((TweetDto) node).getRetweets().add(tweet);
 							System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
-							builder.prepareSQL(tweet,0,"friends_id");
+							builder.prepareSQL(tweet,0,"retweeted_id");
 							visit(tweet, currDepth + 1);
 						}
 					}
@@ -130,23 +131,39 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 							System.out.println("Accessing API");
 							ResponseList<Status> mentions = twitter.getMentionsTimeline();
 							for (Status s : mentions) {
-								TweetDto tweet = new TweetDto();
-								tweet.setTweetId(s.getId());
-								
+								if (isCrawling) {
+									TweetDto tweet = new TweetDto();
+									tweet.setTweetId(s.getId());
+									tweet.setParentId(((TweetDto) node).getTweetId());
+									System.out.println("Obtaining mention : \n" + tweet.toString() + "at level " + currDepth + "\n");
+									builder.prepareSQL(tweet,0,"mentioned_id");
+									visit(tweet, currDepth + 1);
+								}
 							}
-							//TODO: write some nasty code here
 						}
 					}
 					if (relations.contains(Relation.REPLIES_TO)) {
 						if (isCrawling) {
-							// Thread.sleep(3600000 / hitsPerHour);
-							//TODO: write some nasty code here
+							Thread.sleep(3600000 / hitsPerHour);
+							System.out.println("Afraid it's not implementable in any way...");
 						}
 					}
 					if (relations.contains(Relation.HAS_TWEETS)) {
 						if (isCrawling) {
-							// Thread.sleep(3600000 / hitsPerHour);
-							//TODO: write some nasty code here
+							Thread.sleep(3600000 / hitsPerHour);
+							System.out.println("Accessing API");
+							ResponseList<Status> tweets = twitter.getUserTimeline(((UserDto) node).getName());
+							for (Status s : tweets) {
+								if (isCrawling) {
+									TweetDto tweet = new TweetDto();
+									tweet.setTweetId(s.getId());
+									tweet.setParentId(((TweetDto) node).getTweetId());
+									System.out.println("Obtaining tweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
+									builder.prepareSQL(tweet,0,"has_tweets_id");
+									visit(tweet, currDepth + 1);
+								}
+							}
+							
 						}
 					} 			
 				}			

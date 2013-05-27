@@ -15,6 +15,13 @@ import javax.persistence.Table;
 @Table(name="Tweets")
 public class TweetDto extends NodeDto {
 	
+	private static int k=0;
+	
+	public TweetDto(){
+		++k;
+		setId(k);
+	}
+
 	/**
 	 * Tweets that are responses to this tweet - possibly lack of thereof
 	 */
@@ -27,6 +34,11 @@ public class TweetDto extends NodeDto {
 	
 	private long tweetId;
 
+	/**
+	 * Parent id of this tweet - this is user who wrote tweet
+	 */
+	private long parentId;
+	
 	public Collection<TweetDto> getRetweets() {
 		return retweets;
 	}
@@ -43,6 +55,19 @@ public class TweetDto extends NodeDto {
 		this.tweetId = tweetId;
 	}
 	
+	
+	public long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(long parentId) {
+		this.parentId = parentId;
+	}
+	
+	public void setId(int k) {
+		this.id = k;
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("TweetId : " + tweetId + "\n");

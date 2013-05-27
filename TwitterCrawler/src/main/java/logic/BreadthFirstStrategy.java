@@ -28,7 +28,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 	private IPublisher downloadTimer;
 	private String screenName;
 	private Twitter twitter;
-	private Queue queue;
+	private Queue<NodeDto> queue;
 	private int depth;
 	private int hitsPerHour;
 	private int crawlTime;
@@ -39,7 +39,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		this.context = context;
 		twitter = context.getTwitter();
 		screenName = context.getConfig().getSeed();
-		queue= new LinkedList();
+		queue= new LinkedList<NodeDto>();
 		depth = context.getConfig().getDepth();
 		hitsPerHour = context.getConfig().getHitsPerHour();
 		crawlTime = context.getConfig().getCrawlTime();
@@ -78,7 +78,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 
 		while(!queue.isEmpty()){
 			if(currDepth>depth){
-				System.out.println("In your head zombie zombie");
+				System.out.println("In your head zombie zombie you know;p");
 				break;
 			}
 			try {
@@ -86,7 +86,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
-			NodeDto node= (NodeDto)queue.remove();			
+			NodeDto node = queue.remove();			
 			if (node instanceof UserDto) {
 				if (relations.contains(Relation.FOLLOWED_BY)) {
 					if(isCrawling){
@@ -136,6 +136,56 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 						}
 					}					
 				}
+				else if (relations.contains(Relation.MENTIONS)) {
+				if (isCrawling) {
+					System.out.println("Accessing API");
+					try {
+						ResponseList<Status> mentions = twitter.getMentionsTimeline();
+						for (Status s : mentions) {
+							if (isCrawling) {
+								TweetDto tweet = new TweetDto();
+								tweet.setTweetId(s.getId());
+								tweet.setParentId(((UserDto) node).getId());
+								System.out.println("Obtaining mention : \n" + tweet.toString() + "at level " + currDepth + "\n");
+								queue.add(tweet);
+								builder.prepareSQL(tweet,0,"mentioned_id");
+							}
+						}
+					} catch (TwitterException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			else if (relations.contains(Relation.REPLIES_TO)) {
+				if (isCrawling) {
+					try {
+						Thread.sleep(3600000 / hitsPerHour);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					System.out.println("Afraid it's not implementable in any way...");
+				}
+			}
+			else if (relations.contains(Relation.HAS_TWEETS)) {
+				if (isCrawling) {
+					System.out.println("Accessing API");
+					try {
+						ResponseList<Status> tweets = twitter.getUserTimeline(((UserDto) node).getName());
+						for (Status s : tweets) {
+							if (isCrawling) {
+								TweetDto tweet = new TweetDto();
+								tweet.setTweetId(s.getId());
+								tweet.setParentId(((UserDto) node).getId());
+								System.out.println("Obtaining tweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
+								queue.add(tweet);
+								builder.prepareSQL(tweet,0,"has_tweets_id");
+							}
+						}
+					} catch (TwitterException e) {
+						e.printStackTrace();
+					}
+				}
+			}	
 			}
 			else if(node instanceof TweetDto){
 				if (relations.contains(Relation.RETWEETS)) {
@@ -147,34 +197,17 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 								if(isCrawling){
 									TweetDto tweet = new TweetDto();
 									tweet.setTweetId(s.getId());
+									tweet.setParentId(((TweetDto) node).getTweetId());
 									((TweetDto) node).getRetweets().add(tweet);
 									System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
 									queue.add(tweet);
-									builder.prepareSQL(tweet,0,"friends_id");
+									builder.prepareSQL(tweet,0,"retweeted_id");
 								}
 							}
 						} catch (TwitterException e) {
 							e.printStackTrace();
 						}
 					}
-				}
-			}
-			if (relations.contains(Relation.MENTIONS)) {
-				if (isCrawling) {
-					// Thread.sleep(3600000 / hitsPerHour);
-					// yummy yummy
-				}
-			}
-			if (relations.contains(Relation.REPLIES_TO)) {
-				if (isCrawling) {
-					// Thread.sleep(3600000 / hitsPerHour);
-					//heiheihei
-				}
-			}
-			if (relations.contains(Relation.HAS_TWEETS)) {
-				if (isCrawling) {
-					// Thread.sleep(3600000 / hitsPerHour);
-					//papaamericano
 				}
 			}
 			++currDepth;

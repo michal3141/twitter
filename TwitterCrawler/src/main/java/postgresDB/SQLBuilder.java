@@ -1,6 +1,7 @@
 package postgresDB;
 
 import dto.NodeDto;
+import dto.TweetDto;
 import dto.UserDto;
 
 public class SQLBuilder {
@@ -12,7 +13,7 @@ public class SQLBuilder {
 	}
 	
 	public void appendOne(String name){
-		builder.append("INSERT INTO twit(name) VALUES ('"+name+"');\n");
+		builder.append("INSERT INTO users(name) VALUES ('"+name+"');\n");
 	}
 	
 	public void generateTables(){
@@ -26,6 +27,15 @@ public class SQLBuilder {
         + "mentioned_id integer,"
         + "friends_id integer,"
         + "followers_id integer);\n");
+		
+		builder.append("DROP TABLE IF EXISTS tweets;\n");
+		builder.append("CREATE TABLE tweets ("
+		+ "id bigserial NOT NULL PRIMARY KEY,"
+		+ "data VARCHAR(64),"
+		+ "tweet_id integer,"
+		+ "mentioned_id integer,"
+		+ "has_tweets_id integer,"
+		+ "retweeted_id integer);\n");
 	}
 	
 	public void prepareSQL(NodeDto node, long k, String relation){
@@ -35,7 +45,9 @@ public class SQLBuilder {
 			builder.append("'"+u.getLang()+"', '"+u.getName()+"',"+k+");\n");
 		}
 		else{
-			System.out.println("Not implemented yet");
+			TweetDto t = (TweetDto) node;
+			builder.append("INSERT INTO tweets(data,tweet_id,"+relation+") VALUES (");
+			builder.append("'"+"t"+"', '"+t.getTweetId()+"',"+t.getParentId()+");\n");
 		}
 	}
 	
