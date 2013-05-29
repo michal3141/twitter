@@ -1,11 +1,15 @@
 package logic;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import listeners.IListener;
+
+import org.apache.log4j.PropertyConfigurator;
+
 import postgresDB.Persistor;
 import postgresDB.SQLBuilder;
 import publishers.DownloadTimer;
@@ -17,6 +21,12 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
 import utils.Text;
+import ytharvest.factory.EntryFactoryFacade;
+import ytharvest.factory.entities.ExtractedEntity;
+import ytharvest.factory.entities.ExtractedUser;
+import ytharvest.factory.entities.ExtractedVideo;
+import ytharvest.factory.exceptions.HarvestException;
+import ytharvest.properties.Properties;
 import dto.NodeDto;
 import dto.TweetDto;
 import dto.UserDto;
@@ -35,8 +45,10 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 	private int hitsPerHour;
 	private int crawlTime;
 	private Set<Relation> relations;
-	private SQLBuilder builder;
+	private static SQLBuilder builder;
 	private static final int LEN = 63;
+	private static EntryFactoryFacade facade;
+	private static int currDepth=0;
 
 	public BreadthFirstStrategy(TwitterDownloader context) {
 		this.context = context;
@@ -63,6 +75,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		queue.add(user);
 
 		if (isCrawling){
+			download_yt();
 			bfs_twit();
 		}
 
@@ -105,7 +118,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 									System.out.println("Obtaining follower : \n" + user.toString() + 
 											"at level " + currDepth + "\n");
 									queue.add(user);
-									builder.prepareSQL(user,((UserDto) node).getId(),"followers_id");
+									builder.prepareSQL(user,null,((UserDto) node).getId(),"followers_id");
 								}
 							}
 						} catch (TwitterException e) {
@@ -129,7 +142,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 									System.out.println("Obtaining friend : \n" + user.toString() +
 											"at level " + currDepth + "\n");
 									queue.add(user);
-									builder.prepareSQL(user,((UserDto) node).getId(),"friends_id");
+									builder.prepareSQL(user,null,((UserDto) node).getId(),"friends_id");
 								}
 							}
 						} catch (TwitterException e) {
@@ -154,7 +167,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 									tweet.setText(text);
 									System.out.println("Obtaining mention : \n" + tweet.toString() + "at level " + currDepth + "\n");
 									queue.add(tweet);
-									builder.prepareSQL(tweet,0,"mentioned_id");
+									builder.prepareSQL(tweet,null,0,"mentioned_id");
 								}
 							}
 						} catch (TwitterException e) {
@@ -187,7 +200,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 									tweet.setText(text);
 									System.out.println("Obtaining tweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
 									queue.add(tweet);
-									builder.prepareSQL(tweet,0,"has_tweets_id");
+									builder.prepareSQL(tweet,null,0,"has_tweets_id");
 								}
 							}
 						} catch (TwitterException e) {
@@ -213,7 +226,7 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 									((TweetDto) node).getRetweets().add(tweet);
 									System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
 									queue.add(tweet);
-									builder.prepareSQL(tweet,0,"retweeted_id");
+									builder.prepareSQL(tweet,null,0,"retweeted_id");
 								}
 							}
 						} catch (TwitterException e) {
@@ -225,6 +238,98 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 			++currDepth;
 		}
 	}
+	
+	
+	public void download_yt(){
+		try{
+			init();
+
+			System.out.println("Starting yt downloader..");
+
+			String userName = "cris776";
+			System.out.println("Before YT Crawling...");
+		
+//		UserYtDto user = new UserYtDto();
+//		user.setName(userName);
+
+	    	userWithUploads(userName);
+
+	    	currDepth=0;
+			userWithSubs(userName);
+			currDepth=0;
+			userWithFavs(userName);
+			System.out.println("After YT Crawling...");
+		}
+		catch(Exception e){
+			System.out.println("Exception download yt");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void init()
+	{
+		// log4jInit();
+		PropertyConfigurator.configure("target/classes/log4j.properties");
+
+		// YtHarvester
+		Properties.configure("target/classes/harvest.properties");
+		facade = new EntryFactoryFacade();
+	}
+	
+	// Wypisanie upload'ów danego u¿ytkownika
+		private static void userWithUploads(String userId) throws HarvestException, IOException
+		{
+			ExtractedUser user = facade.getUserEntry(userId);
+
+//			Collection<ExtractedVideo> ups = facade.castEntities(
+//					facade.getVideoFeed(user.getUploadedVideosLink()), ExtractedVideo.class);
+			Collection<ExtractedVideo> ups = facade.getCastedVideoFeed(user.getUploadedVideosLink());
+
+//			countUniques(ups);
+
+			for (ExtractedEntity vid : ups){
+				if(currDepth>10)
+					break;
+				++currDepth;
+				builder.prepareSQL(user,vid,0,"uploaded");
+			}
+		}
+		
+
+		private static void userWithFavs(String userId) throws HarvestException, IOException
+		{
+			ExtractedUser user = facade.getUserEntry(userId);
+
+			Collection<ExtractedVideo> ups = facade.castEntities(
+					facade.getVideoFeed(user.getFavedVideosLink()), ExtractedVideo.class);
+
+//			countUniques(ups);
+
+			for (ExtractedVideo vid : ups){
+				if(currDepth>10)
+					break;
+				++currDepth;
+				builder.prepareSQL(user, vid ,0,"favs");
+			}
+		}
+
+
+		private static void userWithSubs(String userId) throws HarvestException, IOException
+		{	
+			if(currDepth+7<10){
+			++currDepth;
+			ExtractedUser user = facade.getUserEntry(userId);
+		//	NodeDto use= new UserYtDto();
+	//		((UserYtDto) use).setName(user.getUserName());
+	//		logEntity(user);
+			
+			Collection<ExtractedUser> subs = facade.castEntities(facade.getUserFeed(user.getSubscriptionsLink()), ExtractedUser.class);
+			for (ExtractedUser u : subs){
+				builder.prepareSQL(user, u,0, "users");
+				userWithSubs(u.getUserName());
+			}}
+		}
+	
 	
 	@Override
 	public void publish(CrawlingEvent event) {

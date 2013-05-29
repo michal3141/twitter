@@ -88,7 +88,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 							tweet.setText(text);
 							((TweetDto) node).getRetweets().add(tweet);
 							System.out.println("Obtaining retweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
-							builder.prepareSQL(tweet,0,"retweeted_id");
+							builder.prepareSQL(tweet,null,0,"retweeted_id");
 							visit(tweet, currDepth + 1);
 						}
 					}
@@ -105,7 +105,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 									((UserDto) node).getFollowers().add(user);
 									System.out.println("Obtaining follower : \n" + user.toString() + 
 													   "at level " + currDepth + "\n");
-									builder.prepareSQL(user,((UserDto) node).getId(),"followers_id");
+									builder.prepareSQL(user,null,((UserDto) node).getId(),"followers_id");
 									visit(user, currDepth + 1);
 								}
 							}
@@ -124,7 +124,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 									((UserDto) node).getFriends().add(user);
 									System.out.println("Obtaining friend : \n" + user.toString() +
 													   "at level " + currDepth + "\n");
-									builder.prepareSQL(user,((UserDto) node).getId(),"friends_id");
+									builder.prepareSQL(user,null,((UserDto) node).getId(),"friends_id");
 									visit(user, currDepth + 1);
 								}
 							}
@@ -144,7 +144,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 									text = Text.processText(text);
 									tweet.setText(text);
 									System.out.println("Obtaining mention : \n" + tweet.toString() + "at level " + currDepth + "\n");
-									builder.prepareSQL(tweet,0,"mentioned_id");
+									builder.prepareSQL(tweet,null,0,"mentioned_id");
 									visit(tweet, currDepth + 1);
 								}
 							}
@@ -170,7 +170,7 @@ public class DepthFirstStrategy implements IStrategy, IListener {
 									text = Text.processText(text);
 									tweet.setText(text);
 									System.out.println("Obtaining tweet : \n" + tweet.toString() + "at level " + currDepth + "\n");
-									builder.prepareSQL(tweet,0,"has_tweets_id");
+									builder.prepareSQL(tweet,null,0,"has_tweets_id");
 									visit(tweet, currDepth + 1);
 								}
 							}
