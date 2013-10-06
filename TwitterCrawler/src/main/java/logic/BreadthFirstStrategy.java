@@ -299,10 +299,9 @@ public class BreadthFirstStrategy implements IStrategy, IListener {
 		private static void userWithFavs(String userId) throws HarvestException, IOException
 		{
 			ExtractedUser user = facade.getUserEntry(userId);
-
 			Collection<ExtractedVideo> ups = facade.castEntities(
 					facade.getVideoFeed(user.getFavedVideosLink()), ExtractedVideo.class);
-
+		
 //			countUniques(ups);
 
 			for (ExtractedVideo vid : ups){
